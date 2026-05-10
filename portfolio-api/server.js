@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const gplay = require('google-play-scraper');
-const store = require('app-store-scraper');
+
 
 const app = express();
 app.use(cors({ origin: '*' }));
