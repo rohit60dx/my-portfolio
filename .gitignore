@@ -43,3 +43,7 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 serviceAccountKey.json
+serviceAccountKey.json
+*.json
+bfg.jar
+serviceAccountKey.json
