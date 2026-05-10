@@ -6,6 +6,10 @@ import '../models/profile_model.dart';
 import '../services/firebase_service.dart';
 import '../utils/theme.dart';
 import 'section_header.dart';
+// Web-only imports with conditional
+import 'dart:js_interop' as js_interop;
+import 'dart:js_interop_unsafe' as js_unsafe;
+import 'package:emailjs/emailjs.dart' as emailjs;
 
 class ContactSection extends StatefulWidget {
   final ProfileModel profile;
@@ -21,11 +25,10 @@ class _ContactSectionState extends State<ContactSection> {
   final _messageController = TextEditingController();
   bool _sending = false;
   String? _status;
-
   Future<void> _submit() async {
-    if (_nameController.text.isEmpty ||
-        _emailController.text.isEmpty ||
-        _messageController.text.isEmpty) {
+    if (_nameController.text.trim().isEmpty ||
+        _emailController.text.trim().isEmpty ||
+        _messageController.text.trim().isEmpty) {
       setState(() => _status = 'Please fill all fields');
       return;
     }
@@ -35,23 +38,46 @@ class _ContactSectionState extends State<ContactSection> {
       _status = null;
     });
 
-    final success = await FirebaseService.submitContact(
-      name: _nameController.text,
-      email: _emailController.text,
-      message: _messageController.text,
-    );
+    try {
+      final templateParams = {
+        'name': _nameController.text.trim(),
+        'email': _emailController.text.trim(),
+        'message': _messageController.text.trim(),
+        'from_name': _nameController.text.trim(),
+      };
 
-    setState(() {
-      _sending = false;
-      _status = success
-          ? '✅ Message sent successfully!'
-          : '❌ Failed to send. Try again.';
-    });
+      // print('🚀 Sending: $templateParams');
 
-    if (success) {
+      // // Using default_service (jaise playground mein kaam kar raha tha)
+      // await emailjs.send(
+      //   'default_service',
+      //   'template_ik6g5tm',
+      //   templateParams,
+      //   const emailjs.Options(publicKey: 'GOEC0olEwNmNNcfyg'),
+      // );
+
+      // print('✅ EmailJS Success');
+
+      await FirebaseService.submitContact(
+        name: _nameController.text.trim(),
+        email: _emailController.text.trim(),
+        message: _messageController.text.trim(),
+      );
+
+      setState(() {
+        _sending = false;
+        _status = '✅ Message sent successfully!';
+      });
+
       _nameController.clear();
       _emailController.clear();
       _messageController.clear();
+    } catch (e) {
+      // print('🔴 Full Error: $e');
+      setState(() {
+        _sending = false;
+        _status = '❌ Failed to send. Try again.';
+      });
     }
   }
 
@@ -85,15 +111,15 @@ class _ContactSectionState extends State<ContactSection> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Direct contact info
-                    Row(
+                    Wrap(
+                      spacing: 24,
+                      runSpacing: 12,
                       children: [
                         _ContactInfo(
                           icon: Icons.email_outlined,
                           label: widget.profile.email,
                           color: AppTheme.primary,
                         ),
-                        const SizedBox(width: 24),
                         _ContactInfo(
                           icon: Icons.phone_outlined,
                           label: widget.profile.phone,
@@ -184,21 +210,22 @@ class _ContactSectionState extends State<ContactSection> {
                       width: double.infinity,
                       child: ElevatedButton(
                         onPressed: _sending ? null : _submit,
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          backgroundColor: Colors.transparent,
-                          shadowColor: Colors.transparent,
-                        ).copyWith(
-                          backgroundColor: MaterialStateProperty.all(
-                            Colors.transparent,
-                          ),
-                          overlayColor: MaterialStateProperty.all(
-                            AppTheme.primary.withOpacity(0.1),
-                          ),
-                        ),
+                        style:
+                            ElevatedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              backgroundColor: Colors.transparent,
+                              shadowColor: Colors.transparent,
+                            ).copyWith(
+                              backgroundColor: MaterialStateProperty.all(
+                                Colors.transparent,
+                              ),
+                              overlayColor: MaterialStateProperty.all(
+                                AppTheme.primary.withOpacity(0.1),
+                              ),
+                            ),
                         child: Ink(
                           decoration: BoxDecoration(
                             gradient: AppGradients.primaryGradient,
@@ -259,23 +286,16 @@ class _ContactInfo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Flexible(
-      child: Row(
-        children: [
-          Icon(icon, color: color, size: 18),
-          const SizedBox(width: 8),
-          Flexible(
-            child: Text(
-              label,
-              style: GoogleFonts.inter(
-                color: AppTheme.textSecondary,
-                fontSize: 14,
-              ),
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-        ],
-      ),
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, color: color, size: 18),
+        const SizedBox(width: 8),
+        Text(
+          label,
+          style: GoogleFonts.inter(color: AppTheme.textSecondary, fontSize: 14),
+        ),
+      ],
     );
   }
 }
