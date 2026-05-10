@@ -522,13 +522,7 @@ class _RatingMini extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        RatingBarIndicator(
-          rating: app.rating,
-          itemBuilder: (_, __) =>
-              const Icon(Icons.star, color: Color(0xFFFFD700)),
-          itemCount: 5,
-          itemSize: 12,
-        ),
+        _StarRow(rating: app.rating, size: 12),
         const SizedBox(width: 5),
         Text(
           app.rating.toStringAsFixed(1),
@@ -551,13 +545,7 @@ class _RatingRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        RatingBarIndicator(
-          rating: app.rating,
-          itemBuilder: (_, __) =>
-              const Icon(Icons.star, color: Color(0xFFFFD700)),
-          itemCount: 5,
-          itemSize: 16,
-        ),
+        _StarRow(rating: app.rating, size: 16),
         const SizedBox(width: 8),
         Text(
           app.rating.toStringAsFixed(1),
@@ -596,6 +584,40 @@ class _RatingRow extends StatelessWidget {
     if (n >= 1000000) return '${(n / 1000000).toStringAsFixed(1)}M';
     if (n >= 1000) return '${(n / 1000).toStringAsFixed(1)}K';
     return n.toString();
+  }
+}
+
+class _StarRow extends StatelessWidget {
+  final double rating;
+  final double size;
+  const _StarRow({required this.rating, required this.size});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: List.generate(5, (index) {
+        if (index < rating.floor()) {
+          return Icon(
+            Icons.star_rounded,
+            color: const Color(0xFFFFD700),
+            size: size,
+          );
+        } else if (index < rating) {
+          return Icon(
+            Icons.star_half_rounded,
+            color: const Color(0xFFFFD700),
+            size: size,
+          );
+        } else {
+          return Icon(
+            Icons.star_outline_rounded,
+            color: const Color(0xFFFFD700),
+            size: size,
+          );
+        }
+      }),
+    );
   }
 }
 

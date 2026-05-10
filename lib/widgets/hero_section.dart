@@ -70,9 +70,7 @@ class _HeroSectionState extends State<HeroSection>
         horizontal: isMobile ? 24 : 80,
         vertical: isMobile ? 60 : 0,
       ),
-      child: isMobile
-          ? _buildMobileLayout()
-          : _buildDesktopLayout(size),
+      child: isMobile ? _buildMobileLayout() : _buildDesktopLayout(size),
     );
   }
 
@@ -228,7 +226,7 @@ class _HeroSectionState extends State<HeroSection>
             ],
           ),
         ),
-        const SizedBox(height: 40),
+        // const SizedBox(height: 40),
 
         // CTA Buttons
         FadeInUp(
@@ -237,19 +235,19 @@ class _HeroSectionState extends State<HeroSection>
             spacing: 16,
             runSpacing: 16,
             children: [
-              _GlowButton(
-                label: 'View Projects',
-                isPrimary: true,
-                onTap: () {},
-              ),
-              _OutlineButton(
-                label: 'Download CV',
-                onTap: () async {
-                  if (widget.profile.resumeUrl.isNotEmpty) {
-                    await launchUrl(Uri.parse(widget.profile.resumeUrl));
-                  }
-                },
-              ),
+              // _GlowButton(
+              //   label: 'View Projects',
+              //   isPrimary: true,
+              //   onTap: () {},
+              // ),
+              // _OutlineButton(
+              //   label: 'Download CV',
+              //   onTap: () async {
+              //     if (widget.profile.resumeUrl.isNotEmpty) {
+              //       await launchUrl(Uri.parse(widget.profile.resumeUrl));
+              //     }
+              //   },
+              // ),
             ],
           ),
         ),
@@ -258,11 +256,11 @@ class _HeroSectionState extends State<HeroSection>
   }
 
   Widget _divider() => Container(
-        height: 30,
-        width: 1,
-        margin: const EdgeInsets.symmetric(horizontal: 20),
-        color: AppTheme.border,
-      );
+    height: 30,
+    width: 1,
+    margin: const EdgeInsets.symmetric(horizontal: 20),
+    color: AppTheme.border,
+  );
 
   Widget _build3DVisual() {
     return AnimatedBuilder(
@@ -326,10 +324,7 @@ class _HeroSectionState extends State<HeroSection>
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         gradient: const RadialGradient(
-                          colors: [
-                            Color(0xFF1A3A5C),
-                            Color(0xFF050B15),
-                          ],
+                          colors: [Color(0xFF1A3A5C), Color(0xFF050B15)],
                         ),
                         boxShadow: [
                           BoxShadow(
@@ -350,8 +345,7 @@ class _HeroSectionState extends State<HeroSection>
                             ? Image.network(
                                 widget.profile.profileImageUrl,
                                 fit: BoxFit.cover,
-                                errorBuilder: (_, __, ___) =>
-                                    _flutterLogo(),
+                                errorBuilder: (_, __, ___) => _flutterLogo(),
                               )
                             : _flutterLogo(),
                       ),
@@ -442,8 +436,7 @@ class _StatItem extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         ShaderMask(
-          shaderCallback: (b) =>
-              AppGradients.primaryGradient.createShader(b),
+          shaderCallback: (b) => AppGradients.primaryGradient.createShader(b),
           child: Text(
             value,
             style: GoogleFonts.orbitron(
@@ -455,10 +448,7 @@ class _StatItem extends StatelessWidget {
         ),
         Text(
           label,
-          style: GoogleFonts.inter(
-            color: AppTheme.textSecondary,
-            fontSize: 12,
-          ),
+          style: GoogleFonts.inter(color: AppTheme.textSecondary, fontSize: 12),
         ),
       ],
     );
@@ -576,11 +566,7 @@ class _OrbitPainter extends CustomPainter {
       ..style = PaintingStyle.fill;
 
     // Dot at top of circle
-    canvas.drawCircle(
-      Offset(size.width / 2, 4),
-      4,
-      paint,
-    );
+    canvas.drawCircle(Offset(size.width / 2, 4), 4, paint);
   }
 
   @override
