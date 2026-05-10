@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "201271266109",
+    "project_id": "my-portfolio-cb170",
+    "storage_bucket": "my-portfolio-cb170.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:201271266109:android:81af9c3f1ccc3b8c9a9354",
+        "android_client_info": {
+          "package_name": "com.example.rohit_portfolio"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB9yja7TwoYPKzuIeWV0oO7sCpE0MOoR94"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,0 +1,19 @@
+{
+  "name": "portfolio-functions",
+  "description": "Firebase Cloud Functions for portfolio app",
+  "scripts": {
+    "serve": "firebase emulators:start --only functions",
+    "deploy": "firebase deploy --only functions"
+  },
+  "engines": {
+    "node": "20"
+  },
+  "main": "index.js",
+  "dependencies": {
+    "firebase-functions": "^6.0.0",
+    "firebase-admin": "^12.0.0",
+    "google-play-scraper": "^9.1.0",
+    "app-store-scraper": "^0.22.0",
+    "cors": "^2.8.5"
+  }
+}
