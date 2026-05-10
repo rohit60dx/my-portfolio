@@ -6,7 +6,7 @@ import 'package:rohit_portfolio/models/app_model.dart';
 class AppFetchService {
   // ✅ Apni deployed Cloud Function ka URL yahan daalo
   static const String _functionUrl =
-      'https://us-central1-YOUR_PROJECT_ID.cloudfunctions.net/fetchAppDetails';
+      'https://my-portfolio-57yr.onrender.com/fetch-app';
 
   /// Sirf Play Store URL, ya Apple URL, ya dono de sakte ho
   static Future<AppModel?> fetchFromStores({
@@ -42,7 +42,7 @@ class AppFetchService {
         version: data['version'] ?? '',
         size: data['size'] ?? '',
         category: data['category'] ?? '',
-        developer: data['developer'] ?? '',
+        // developer: data['developer'] ?? '',
         playStoreUrl: playStoreUrl,
         appStoreUrl: appStoreUrl,
         androidApkUrl: null,

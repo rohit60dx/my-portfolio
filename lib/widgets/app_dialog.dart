@@ -337,7 +337,7 @@ class __AddAppDialogState extends State<_AddAppDialog> {
         _previewRow('App', app.name),
         _previewRow('Category', app.category),
         _previewRow('Rating', app.rating.toStringAsFixed(1)),
-        _previewRow('Developer', app.developer),
+        // _previewRow('Developer', app.developer),
         _previewRow('Screenshots', '${app.screenshots.length} screenshots'),
       ],
     ),

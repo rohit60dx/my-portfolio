@@ -8,6 +8,7 @@ class ProjectModel {
   final List<String> screenshots;
   final String? githubUrl;
   final String? liveUrl;
+  final bool isProduction; // true = Live, false = Upcoming
   final bool isFeatured;
   final int order;
 
@@ -20,6 +21,7 @@ class ProjectModel {
     required this.screenshots,
     this.githubUrl,
     this.liveUrl,
+    required this.isProduction,
     required this.isFeatured,
     required this.order,
   });
@@ -34,6 +36,7 @@ class ProjectModel {
       screenshots: List<String>.from(data['screenshots'] ?? []),
       githubUrl: data['githubUrl'],
       liveUrl: data['liveUrl'],
+      isProduction: data['isProduction'] ?? true,
       isFeatured: data['isFeatured'] ?? false,
       order: data['order'] ?? 0,
     );

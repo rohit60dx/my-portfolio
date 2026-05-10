@@ -2,6 +2,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:rohit_portfolio/models/app_model.dart';
 import 'package:rohit_portfolio/models/profile_model.dart';
+import 'package:rohit_portfolio/models/project_model.dart';
 
 class FirebaseService {
   static final FirebaseFirestore _db = FirebaseFirestore.instance;
@@ -46,6 +47,46 @@ class FirebaseService {
     } catch (e) {
       print('Error fetching apps: $e');
       return [];
+    }
+  }
+
+  // ─── SAVE APP ────────────────────────────────────────────────
+  static Future<bool> saveApp(AppModel app) async {
+    try {
+      // Get current apps count for order
+      final snapshot = await _db.collection('apps').get();
+      final order = snapshot.docs.length;
+
+      await _db.collection('apps').add({
+        'name': app.name,
+        'shortDescription': app.shortDescription,
+        'description': app.description,
+        'iconUrl': app.iconUrl,
+        'screenshots': app.screenshots,
+        'rating': app.rating,
+        'totalRatings': app.totalRatings,
+        'downloads': app.downloads,
+        'version': app.version,
+        'size': app.size,
+        'category': app.category,
+        'features': app.features,
+        'playStoreUrl': app.playStoreUrl?.isNotEmpty == true
+            ? app.playStoreUrl
+            : null,
+        'appStoreUrl': app.appStoreUrl?.isNotEmpty == true
+            ? app.appStoreUrl
+            : null,
+        'androidApkUrl': app.androidApkUrl?.isNotEmpty == true
+            ? app.androidApkUrl
+            : null,
+        'isPublished': true,
+        'order': order,
+        'createdAt': FieldValue.serverTimestamp(),
+      });
+      return true;
+    } catch (e) {
+      print('Error saving app: $e');
+      return false;
     }
   }
 

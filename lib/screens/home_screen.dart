@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:rohit_portfolio/models/app_model.dart';
 import 'package:rohit_portfolio/models/profile_model.dart';
+import 'package:rohit_portfolio/models/project_model.dart';
 import 'package:rohit_portfolio/services/firebase_service.dart';
 import 'package:rohit_portfolio/utils/theme.dart';
 import 'package:rohit_portfolio/widgets/about_section.dart';

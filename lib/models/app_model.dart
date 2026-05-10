@@ -1,45 +1,3 @@
-// lib/models/project_model.dart
-class ProjectModel {
-  final String id;
-  final String title;
-  final String description;
-  final String category;
-  final List<String> technologies;
-  final List<String> screenshots;
-  final String? githubUrl;
-  final String? liveUrl;
-  final bool isFeatured;
-  final int order;
-
-  ProjectModel({
-    required this.id,
-    required this.title,
-    required this.description,
-    required this.category,
-    required this.technologies,
-    required this.screenshots,
-    this.githubUrl,
-    this.liveUrl,
-    required this.isFeatured,
-    required this.order,
-  });
-
-  factory ProjectModel.fromFirestore(Map<String, dynamic> data, String id) {
-    return ProjectModel(
-      id: id,
-      title: data['title'] ?? '',
-      description: data['description'] ?? '',
-      category: data['category'] ?? 'Mobile App',
-      technologies: List<String>.from(data['technologies'] ?? []),
-      screenshots: List<String>.from(data['screenshots'] ?? []),
-      githubUrl: data['githubUrl'],
-      liveUrl: data['liveUrl'],
-      isFeatured: data['isFeatured'] ?? false,
-      order: data['order'] ?? 0,
-    );
-  }
-}
-
 // lib/models/app_model.dart
 class AppModel {
   final String id;
@@ -78,9 +36,16 @@ class AppModel {
     required this.category,
     required this.features,
     required this.downloads,
-    required this.isPublished,
-    required this.order,
+    this.isPublished = false,
+    this.order = 0,
   });
+
+  // Empty string ko null treat karo
+  static String? _nullIfEmpty(dynamic val) {
+    if (val == null) return null;
+    final s = val.toString().trim();
+    return s.isEmpty ? null : s;
+  }
 
   factory AppModel.fromFirestore(Map<String, dynamic> data, String id) {
     return AppModel(
@@ -92,9 +57,9 @@ class AppModel {
       screenshots: List<String>.from(data['screenshots'] ?? []),
       rating: (data['rating'] ?? 0.0).toDouble(),
       totalRatings: data['totalRatings'] ?? 0,
-      playStoreUrl: data['playStoreUrl'],
-      appStoreUrl: data['appStoreUrl'],
-      androidApkUrl: data['androidApkUrl'],
+      playStoreUrl: _nullIfEmpty(data['playStoreUrl']),
+      appStoreUrl: _nullIfEmpty(data['appStoreUrl']),
+      androidApkUrl: _nullIfEmpty(data['androidApkUrl']),
       version: data['version'] ?? '1.0.0',
       size: data['size'] ?? '',
       category: data['category'] ?? 'Productivity',
