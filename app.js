@@ -1,6 +1,5 @@
 const admin = require('firebase-admin');
-const serviceAccount = require("./serviceAccountKey.json");
-
+const serviceAccount = require("./service-account.json");
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount)
 });
@@ -8,34 +7,36 @@ admin.initializeApp({
 const db = admin.firestore();
 
 const appData = {
-  "name": "Globall",
-  "shortDescription": "Football team management app for players, parents, coaches & managers with chats, schedules & event updates.",
-  "description": "Globall helps football clubs and teams stay organised and connected.\n\nWith Globall, players, parents, coaches, and team managers can:\n• Communicate through structured team chats\n• View match schedules, training sessions, and club events\n• Access detailed event and training camp information\n\nClub administration is handled via the web platform. Perfect for real-world football team coordination.",
-  "iconUrl": "https://play-lh.googleusercontent.com/r3vHMktfMh82B1QG7aGs-xE5DieMX-WSAyqRJ5cTBpUOyrWd06gsZmCSq4-qGqrRNDy0vlmk-7jIvU1wtfyHTu0=w480-h960-rw",
+  "name": "Notifly App",
+  "shortDescription": "Student Parent Alerts & Reports for Teachers & Schools",
+  "description": "Notifly is a communication app that helps teachers and schools save time while keeping families and coworkers informed.\n\nSend quick, personalized updates to parents through text or email in seconds. Whether it’s a parent reminder, student praise, or behavior comment, Notifly works instantly.\n\n• Send real-time updates in seconds\n• Use message templates for common messages\n• Deliver messages by text and email simultaneously\n• Engage more families in less time",
+  "iconUrl": "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/b5/88/26/b58826fc-052a-8ed1-51e5-c3a00cefa6df/Placeholder.mill/400x400bb-75.webp",
   "screenshots": [
-    "https://play-lh.googleusercontent.com/1-UUeJcRZjT94D8PZXd9RaFm8xk0NwGSJ19c8hRCXJAFWaXErcj6VPF8wg7Vt4NBRiruy8VAB0uYgoNi29--TbQ=w1052-h592-rw",
-    "https://play-lh.googleusercontent.com/1-UUeJcRZjT94D8PZXd9RaFm8xk0NwGSJ19c8hRCXJAFWaXErcj6VPF8wg7Vt4NBRiruy8VAB0uYgoNi29--TbQ=w1052-h592-rw",
-    "https://play-lh.googleusercontent.com/BmdOmkkGbG_apSJn7WK0wX2L2jgn6iN8U3GYYt3_QAQJqouURP3tLyW6UruKssDt7y4ovwjLnX-DYa2-D6Euvg=w1052-h592-rw"
+    "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/40/fe/c6/40fec62e-50c0-e9b5-4e0c-6674bc813556/IPHONE7-1.png/314x680bb.webp",
+    "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/11/d5/e3/11d5e3d9-c744-6357-6391-16e4300faf89/IPHONE7-4.png/314x680bb.webp",
+    "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/f4/51/58/f4515872-fad4-8498-7aa9-93de3d79ae27/IPHONE7-2.png/314x680bb.webp",
+    "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/b7/1d/2b/b71d2b69-4c43-cdf4-9461-43fc266c2876/IPHONE7-3.png/314x680bb.webp",
+    "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/5e/8b/76/5e8b7618-df2a-8bee-3c22-7590ec39b7b5/IPHONE7-5.png/314x680bb.webp"
   ],
-  "rating": 4.5,
-  "totalRatings": 100,
-  "playStoreUrl": "https://play.google.com/store/apps/details?id=app.globall.globallApp",
-  "appStoreUrl": null,
-  "androidApkUrl": null,
-  "version": "Latest",
-  "size": "Varies with device",
-  "category": "Sports",
+  "rating": 5.0,
+  "totalRatings": 2,
+  "playStoreUrl": "",
+  "appStoreUrl": "https://apps.apple.com/us/app/notifly-app/id6745785595",
+  "androidApkUrl": "",
+  "version": "1.0.1",
+  "size": "",
+  "category": "Education",
   "features": [
-    "Team Chat",
-    "Match Schedules",
-    "Training Sessions",
-    "Event Management",
-    "Club Communication",
-    "Real-time Updates"
+    "Parent Alerts",
+    "Student Reports",
+    "Quick Text & Email",
+    "Message Templates",
+    "Real-time Updates",
+    "Teacher Communication"
   ],
-  "downloads": 5000,
+  "downloads": null,
   "isPublished": true,
-  "order": 7
+  "order": 8
 };
 
 async function uploadAppData() {
