@@ -9,13 +9,26 @@ import '../models/app_model.dart';
 import '../utils/theme.dart';
 import 'section_header.dart';
 
-class AppsSection extends StatelessWidget {
+class AppsSection extends StatefulWidget {
   final List<AppModel> apps;
   const AppsSection({super.key, required this.apps});
 
   @override
+  State<AppsSection> createState() => _AppsSectionState();
+}
+
+class _AppsSectionState extends State<AppsSection> {
+  // Pehle sirf 4 apps dikhao
+  static const int _initialCount = 4;
+  bool _showAll = false;
+
+  @override
   Widget build(BuildContext context) {
     final isMobile = MediaQuery.of(context).size.width < 768;
+    final visibleApps = _showAll
+        ? widget.apps
+        : widget.apps.take(_initialCount).toList();
+    final hasMore = widget.apps.length > _initialCount;
 
     return Container(
       padding: EdgeInsets.symmetric(
@@ -30,7 +43,8 @@ class AppsSection extends StatelessWidget {
             subtitle: 'Available on Play Store & App Store',
           ),
           const SizedBox(height: 60),
-          if (apps.isEmpty)
+
+          if (widget.apps.isEmpty)
             Container(
               padding: const EdgeInsets.all(60),
               decoration: BoxDecoration(
@@ -57,7 +71,7 @@ class AppsSection extends StatelessWidget {
                 ],
               ),
             )
-          else
+          else ...[
             GridView.builder(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
@@ -65,22 +79,109 @@ class AppsSection extends StatelessWidget {
                 crossAxisCount: isMobile ? 1 : 2,
                 mainAxisSpacing: 16,
                 crossAxisSpacing: 16,
-                childAspectRatio: isMobile ? 4.5 : 4.0,
+                // FIX 1: height thodi zyada di — overflow khatam
+                mainAxisExtent: 88,
               ),
-              itemCount: apps.length,
+              itemCount: visibleApps.length,
               itemBuilder: (context, index) => FadeInUp(
                 delay: Duration(milliseconds: index * 100),
-                child: _AppCompactCard(app: apps[index]),
+                child: _AppCompactCard(app: visibleApps[index]),
               ),
             ),
+
+            // FIX 2: See More / See Less button
+            if (hasMore) ...[
+              const SizedBox(height: 24),
+              Center(
+                child: _SeeMoreButton(
+                  showAll: _showAll,
+                  totalCount: widget.apps.length,
+                  shownCount: _initialCount,
+                  onTap: () => setState(() => _showAll = !_showAll),
+                ),
+              ),
+            ],
+          ],
         ],
       ),
     );
   }
 }
 
-// ── Compact card (like Play Store list item) ──────────────────────────────────
+// ── See More / Less Button ────────────────────────────────────────────────────
+class _SeeMoreButton extends StatefulWidget {
+  final bool showAll;
+  final int totalCount;
+  final int shownCount;
+  final VoidCallback onTap;
 
+  const _SeeMoreButton({
+    required this.showAll,
+    required this.totalCount,
+    required this.shownCount,
+    required this.onTap,
+  });
+
+  @override
+  State<_SeeMoreButton> createState() => __SeeMoreButtonState();
+}
+
+class __SeeMoreButtonState extends State<_SeeMoreButton> {
+  bool _hovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final remaining = widget.totalCount - widget.shownCount;
+
+    return MouseRegion(
+      onEnter: (_) => setState(() => _hovered = true),
+      onExit: (_) => setState(() => _hovered = false),
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 12),
+          decoration: BoxDecoration(
+            color: _hovered
+                ? AppTheme.primary.withOpacity(0.1)
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(50),
+            border: Border.all(
+              color: _hovered ? AppTheme.primary : AppTheme.border,
+            ),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              AnimatedRotation(
+                turns: widget.showAll ? 0.5 : 0,
+                duration: const Duration(milliseconds: 300),
+                child: Icon(
+                  Icons.keyboard_arrow_down_rounded,
+                  color: _hovered ? AppTheme.primary : AppTheme.textSecondary,
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                widget.showAll
+                    ? 'Show Less'
+                    : 'See $remaining More App${remaining > 1 ? 's' : ''}',
+                style: GoogleFonts.inter(
+                  color: _hovered ? AppTheme.primary : AppTheme.textSecondary,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ── Compact card ──────────────────────────────────────────────────────────────
 class _AppCompactCard extends StatefulWidget {
   final AppModel app;
   const _AppCompactCard({required this.app});
@@ -103,7 +204,7 @@ class __AppCompactCardState extends State<_AppCompactCard> {
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
           transform: Matrix4.identity()..translate(0.0, _hovered ? -2.0 : 0.0),
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           decoration: BoxDecoration(
             color: AppTheme.bgCard,
             borderRadius: BorderRadius.circular(16),
@@ -124,45 +225,43 @@ class __AppCompactCardState extends State<_AppCompactCard> {
           ),
           child: Row(
             children: [
-              // App icon
               _AppIcon(
                 iconUrl: widget.app.iconUrl,
                 name: widget.app.name,
-                size: 56,
+                size: 52,
               ),
               const SizedBox(width: 14),
-              // Name + category + rating
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
                       widget.app.name,
                       style: GoogleFonts.spaceGrotesk(
                         color: AppTheme.textPrimary,
-                        fontSize: 15,
+                        fontSize: 14,
                         fontWeight: FontWeight.w700,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 3),
+                    const SizedBox(height: 2),
                     Text(
                       widget.app.category,
                       style: GoogleFonts.inter(
                         color: AppTheme.primary,
-                        fontSize: 12,
+                        fontSize: 11,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 5),
+                    const SizedBox(height: 4),
                     _RatingMini(app: widget.app),
                   ],
                 ),
               ),
-              // Arrow hint
               Icon(
                 Icons.chevron_right_rounded,
                 color: _hovered ? AppTheme.primary : AppTheme.textSecondary,
@@ -185,7 +284,6 @@ void _showAppDetail(BuildContext context, AppModel app) {
 }
 
 // ── Full detail dialog ────────────────────────────────────────────────────────
-
 class _AppDetailDialog extends StatefulWidget {
   final AppModel app;
   const _AppDetailDialog({required this.app});
@@ -200,16 +298,15 @@ class __AppDetailDialogState extends State<_AppDetailDialog> {
   @override
   Widget build(BuildContext context) {
     final isMobile = MediaQuery.of(context).size.width < 768;
-    final maxW = isMobile ? double.infinity : 760.0;
 
     return Dialog(
       backgroundColor: Colors.transparent,
       insetPadding: EdgeInsets.symmetric(
-        horizontal: isMobile ? 16 : 40,
+        horizontal: isMobile ? 12 : 40,
         vertical: 40,
       ),
       child: ConstrainedBox(
-        constraints: BoxConstraints(maxWidth: maxW),
+        constraints: BoxConstraints(maxWidth: isMobile ? double.infinity : 760),
         child: Container(
           decoration: BoxDecoration(
             color: AppTheme.bgCard,
@@ -219,31 +316,26 @@ class __AppDetailDialogState extends State<_AppDetailDialog> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Header with close button
               _buildHeader(isMobile),
-              // Scrollable body
               ConstrainedBox(
                 constraints: BoxConstraints(
-                  maxHeight: MediaQuery.of(context).size.height * 0.65,
+                  maxHeight: MediaQuery.of(context).size.height * 0.6,
                 ),
                 child: SingleChildScrollView(
-                  padding: const EdgeInsets.all(24),
+                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Divider between header and body
-                      Container(
-                        height: 1,
-                        color: AppTheme.border,
-                        margin: const EdgeInsets.only(bottom: 20),
-                      ),
+                      Container(height: 1, color: AppTheme.border),
+                      const SizedBox(height: 16),
+
                       // Description
-                      if ((widget.app.description.isNotEmpty))
+                      if (widget.app.description.isNotEmpty)
                         Text(
                           widget.app.description,
                           style: GoogleFonts.inter(
                             color: AppTheme.textSecondary,
-                            fontSize: 14,
+                            fontSize: 13,
                             height: 1.7,
                           ),
                         )
@@ -252,17 +344,18 @@ class __AppDetailDialogState extends State<_AppDetailDialog> {
                           widget.app.shortDescription,
                           style: GoogleFonts.inter(
                             color: AppTheme.textSecondary,
-                            fontSize: 14,
+                            fontSize: 13,
                             height: 1.7,
                           ),
                         ),
+
                       // Screenshots
                       if (widget.app.screenshots.isNotEmpty) ...[
-                        const SizedBox(height: 24),
+                        const SizedBox(height: 20),
                         _sectionTitle('Screenshots'),
                         const SizedBox(height: 12),
                         SizedBox(
-                          height: 200,
+                          height: 180,
                           child: ListView.builder(
                             scrollDirection: Axis.horizontal,
                             itemCount: widget.app.screenshots.length,
@@ -271,10 +364,10 @@ class __AppDetailDialogState extends State<_AppDetailDialog> {
                                   setState(() => _selectedScreenshot = index),
                               child: AnimatedContainer(
                                 duration: const Duration(milliseconds: 200),
-                                margin: const EdgeInsets.only(right: 12),
-                                width: 100,
+                                margin: const EdgeInsets.only(right: 10),
+                                width: 90,
                                 decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(12),
+                                  borderRadius: BorderRadius.circular(10),
                                   border: Border.all(
                                     color: _selectedScreenshot == index
                                         ? AppTheme.primary
@@ -283,7 +376,7 @@ class __AppDetailDialogState extends State<_AppDetailDialog> {
                                   ),
                                 ),
                                 child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(11),
+                                  borderRadius: BorderRadius.circular(9),
                                   child: CachedNetworkImage(
                                     imageUrl: widget.app.screenshots[index],
                                     fit: BoxFit.cover,
@@ -310,11 +403,12 @@ class __AppDetailDialogState extends State<_AppDetailDialog> {
                           ),
                         ),
                       ],
+
                       // Features
                       if (widget.app.features.isNotEmpty) ...[
-                        const SizedBox(height: 24),
+                        const SizedBox(height: 20),
                         _sectionTitle('Features'),
-                        const SizedBox(height: 12),
+                        const SizedBox(height: 10),
                         Wrap(
                           spacing: 8,
                           runSpacing: 8,
@@ -322,8 +416,8 @@ class __AppDetailDialogState extends State<_AppDetailDialog> {
                               .map(
                                 (f) => Container(
                                   padding: const EdgeInsets.symmetric(
-                                    horizontal: 12,
-                                    vertical: 6,
+                                    horizontal: 10,
+                                    vertical: 5,
                                   ),
                                   decoration: BoxDecoration(
                                     color: AppTheme.bgCard2,
@@ -336,14 +430,14 @@ class __AppDetailDialogState extends State<_AppDetailDialog> {
                                       const Icon(
                                         Icons.check_circle_outline,
                                         color: AppTheme.accent,
-                                        size: 14,
+                                        size: 13,
                                       ),
-                                      const SizedBox(width: 6),
+                                      const SizedBox(width: 5),
                                       Text(
                                         f,
                                         style: GoogleFonts.inter(
                                           color: AppTheme.textSecondary,
-                                          fontSize: 13,
+                                          fontSize: 12,
                                         ),
                                       ),
                                     ],
@@ -353,11 +447,12 @@ class __AppDetailDialogState extends State<_AppDetailDialog> {
                               .toList(),
                         ),
                       ],
-                      // Download buttons
-                      const SizedBox(height: 24),
+
+                      // Store buttons
+                      const SizedBox(height: 20),
                       Wrap(
-                        spacing: 12,
-                        runSpacing: 12,
+                        spacing: 10,
+                        runSpacing: 10,
                         children: [
                           if (widget.app.playStoreUrl != null)
                             _StoreButton(
@@ -398,16 +493,16 @@ class __AppDetailDialogState extends State<_AppDetailDialog> {
 
   Widget _buildHeader(bool isMobile) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _AppIcon(
             iconUrl: widget.app.iconUrl,
             name: widget.app.name,
-            size: 64,
+            size: isMobile ? 52 : 64,
           ),
-          const SizedBox(width: 16),
+          const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -416,16 +511,17 @@ class __AppDetailDialogState extends State<_AppDetailDialog> {
                   widget.app.name,
                   style: GoogleFonts.spaceGrotesk(
                     color: AppTheme.textPrimary,
-                    fontSize: isMobile ? 18 : 22,
+                    fontSize: isMobile ? 15 : 20,
                     fontWeight: FontWeight.w700,
                   ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 2),
-                // Category badge
+                const SizedBox(height: 4),
                 Container(
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 3,
+                    horizontal: 8,
+                    vertical: 2,
                   ),
                   decoration: BoxDecoration(
                     color: AppTheme.primary.withOpacity(0.1),
@@ -438,22 +534,25 @@ class __AppDetailDialogState extends State<_AppDetailDialog> {
                     widget.app.category,
                     style: GoogleFonts.inter(
                       color: AppTheme.primary,
-                      fontSize: 11,
+                      fontSize: 10,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
                 ),
-                const SizedBox(height: 8),
-                _RatingRow(app: widget.app),
+                const SizedBox(height: 6),
+                // FIX 3: Wrap use kiya — mobile pe overflow nahi hoga
+                _RatingRow(app: widget.app, isMobile: isMobile),
               ],
             ),
           ),
-          // Close button
           IconButton(
             onPressed: () => Navigator.of(context).pop(),
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
             icon: const Icon(
               Icons.close_rounded,
               color: AppTheme.textSecondary,
+              size: 20,
             ),
           ),
         ],
@@ -465,7 +564,7 @@ class __AppDetailDialogState extends State<_AppDetailDialog> {
     title,
     style: GoogleFonts.spaceGrotesk(
       color: AppTheme.textPrimary,
-      fontSize: 15,
+      fontSize: 14,
       fontWeight: FontWeight.w600,
     ),
   );
@@ -521,6 +620,7 @@ class _RatingMini extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
+      mainAxisSize: MainAxisSize.min,
       children: [
         RatingBarIndicator(
           rating: app.rating,
@@ -534,7 +634,7 @@ class _RatingMini extends StatelessWidget {
           app.rating.toStringAsFixed(1),
           style: GoogleFonts.inter(
             color: const Color(0xFFFFD700),
-            fontSize: 12,
+            fontSize: 11,
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -545,10 +645,70 @@ class _RatingMini extends StatelessWidget {
 
 class _RatingRow extends StatelessWidget {
   final AppModel app;
-  const _RatingRow({required this.app});
+  final bool isMobile;
+  const _RatingRow({required this.app, this.isMobile = false});
+
+  String _formatNumber(int n) {
+    if (n >= 1000000) return '${(n / 1000000).toStringAsFixed(1)}M';
+    if (n >= 1000) return '${(n / 1000).toStringAsFixed(1)}K';
+    return n.toString();
+  }
 
   @override
   Widget build(BuildContext context) {
+    // FIX 3: Mobile pe Wrap use karo — overflow nahi hoga
+    if (isMobile) {
+      return Wrap(
+        spacing: 6,
+        runSpacing: 4,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        children: [
+          RatingBarIndicator(
+            rating: app.rating,
+            itemBuilder: (_, __) =>
+                const Icon(Icons.star, color: Color(0xFFFFD700)),
+            itemCount: 5,
+            itemSize: 14,
+          ),
+          Text(
+            app.rating.toStringAsFixed(1),
+            style: GoogleFonts.orbitron(
+              color: const Color(0xFFFFD700),
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          Text(
+            '(${_formatNumber(app.totalRatings)} ratings)',
+            style: GoogleFonts.inter(
+              color: AppTheme.textSecondary,
+              fontSize: 11,
+            ),
+          ),
+          if (app.downloads > 0)
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(
+                  Icons.download_outlined,
+                  color: AppTheme.textSecondary,
+                  size: 12,
+                ),
+                const SizedBox(width: 3),
+                Text(
+                  '${_formatNumber(app.downloads)}+ downloads',
+                  style: GoogleFonts.inter(
+                    color: AppTheme.textSecondary,
+                    fontSize: 11,
+                  ),
+                ),
+              ],
+            ),
+        ],
+      );
+    }
+
+    // Desktop — original Row
     return Row(
       children: [
         RatingBarIndicator(
@@ -591,12 +751,6 @@ class _RatingRow extends StatelessWidget {
       ],
     );
   }
-
-  String _formatNumber(int n) {
-    if (n >= 1000000) return '${(n / 1000000).toStringAsFixed(1)}M';
-    if (n >= 1000) return '${(n / 1000).toStringAsFixed(1)}K';
-    return n.toString();
-  }
 }
 
 class _StoreButton extends StatefulWidget {
@@ -630,7 +784,7 @@ class __StoreButtonState extends State<_StoreButton> {
         onTap: () => launchUrl(Uri.parse(widget.url)),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
           decoration: BoxDecoration(
             color: _hovered ? widget.color.withOpacity(0.15) : AppTheme.bgCard2,
             borderRadius: BorderRadius.circular(12),
@@ -641,8 +795,8 @@ class __StoreButtonState extends State<_StoreButton> {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(widget.icon, color: widget.color, size: 22),
-              const SizedBox(width: 10),
+              Icon(widget.icon, color: widget.color, size: 20),
+              const SizedBox(width: 8),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
@@ -651,7 +805,7 @@ class __StoreButtonState extends State<_StoreButton> {
                     widget.sublabel,
                     style: GoogleFonts.inter(
                       color: AppTheme.textSecondary,
-                      fontSize: 10,
+                      fontSize: 9,
                     ),
                   ),
                   Text(
@@ -659,7 +813,7 @@ class __StoreButtonState extends State<_StoreButton> {
                     style: GoogleFonts.spaceGrotesk(
                       color: AppTheme.textPrimary,
                       fontWeight: FontWeight.w700,
-                      fontSize: 14,
+                      fontSize: 13,
                     ),
                   ),
                 ],
