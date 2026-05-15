@@ -1,15 +1,11 @@
-// lib/widgets/contact_section.dart
 import 'package:flutter/material.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:resend/resend.dart';
 import '../models/profile_model.dart';
 import '../services/firebase_service.dart';
 import '../utils/theme.dart';
 import 'section_header.dart';
-// Web-only imports with conditional
-import 'dart:js_interop' as js_interop;
-import 'dart:js_interop_unsafe' as js_unsafe;
-import 'package:emailjs/emailjs.dart' as emailjs;
 
 class ContactSection extends StatefulWidget {
   final ProfileModel profile;
@@ -25,6 +21,7 @@ class _ContactSectionState extends State<ContactSection> {
   final _messageController = TextEditingController();
   bool _sending = false;
   String? _status;
+
   Future<void> _submit() async {
     if (_nameController.text.trim().isEmpty ||
         _emailController.text.trim().isEmpty ||
@@ -39,24 +36,25 @@ class _ContactSectionState extends State<ContactSection> {
     });
 
     try {
-      final templateParams = {
-        'name': _nameController.text.trim(),
-        'email': _emailController.text.trim(),
-        'message': _messageController.text.trim(),
-        'from_name': _nameController.text.trim(),
-      };
+      final resend = Resend(apiKey: 're_8iGS56NX_2jasgYqeZzXcHsFknpUJZn9d');
 
-      // print('🚀 Sending: $templateParams');
+      await resend.sendEmail(
+        from: 'Portfolio <onboarding@resend.dev>',
+        to: ['rohit50dx@gmail.com'],
+        subject: 'New Contact from ${_nameController.text.trim()}',
+        html:
+            '''
+        <h2>New Message Received</h2>
+        <p><strong>Name:</strong> ${_nameController.text.trim()}</p>
+        <p><strong>Email:</strong> ${_emailController.text.trim()}</p>
+        <p><strong>Message:</strong></p>
+        <p style="white-space: pre-wrap;">${_messageController.text.trim()}</p>
+        <hr>
+        <small>Sent from Portfolio App • ${DateTime.now().toString()}</small>
+      ''',
+      );
 
-      // // Using default_service (jaise playground mein kaam kar raha tha)
-      // await emailjs.send(
-      //   'default_service',
-      //   'template_ik6g5tm',
-      //   templateParams,
-      //   const emailjs.Options(publicKey: 'GOEC0olEwNmNNcfyg'),
-      // );
-
-      // print('✅ EmailJS Success');
+      debugPrint('✅ Email sent successfully via Resend');
 
       await FirebaseService.submitContact(
         name: _nameController.text.trim(),
@@ -73,7 +71,7 @@ class _ContactSectionState extends State<ContactSection> {
       _emailController.clear();
       _messageController.clear();
     } catch (e) {
-      // print('🔴 Full Error: $e');
+      debugPrint('❌ Resend Error: $e');
       setState(() {
         _sending = false;
         _status = '❌ Failed to send. Try again.';

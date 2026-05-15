@@ -569,58 +569,85 @@ class __AppDetailDialogState extends State<_AppDetailDialog> {
     );
   }
 
-  // Single App Update Function
+  // Single App Update Function (with better debugging)
   Future<void> _updateSingleApp(BuildContext context) async {
     try {
-      setState(() {}); // loading dikha sakte ho agar chaaho
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Fetching latest data...')));
 
       final updatedApp = await AppFetchService.fetchFromStores(
         playStoreUrl: widget.app.playStoreUrl,
         appStoreUrl: widget.app.appStoreUrl,
       );
 
-      if (updatedApp != null) {
-        // Firebase mein update kar do
-        final doc = await FirebaseFirestore.instance
-            .collection('apps')
-            .where('playStoreUrl', isEqualTo: widget.app.playStoreUrl)
-            .get();
+      if (updatedApp == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('❌ Failed to fetch data from Play Store'),
+          ),
+        );
+        return;
+      }
 
-        if (doc.docs.isNotEmpty) {
-          await doc.docs.first.reference.update({
-            'name': updatedApp.name,
-            'shortDescription': updatedApp.shortDescription,
-            'description': updatedApp.description,
-            'iconUrl': updatedApp.iconUrl,
-            'screenshots': updatedApp.screenshots,
-            'rating': updatedApp.rating,
-            'totalRatings': updatedApp.totalRatings,
-            'downloads': updatedApp.downloads,
-            'version': updatedApp.version,
-            'lastUpdated': FieldValue.serverTimestamp(),
-          });
+      print(
+        "✅ Fetched Data: ${updatedApp.name} | Rating: ${updatedApp.rating}",
+      );
 
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('✅ App Updated Successfully!'),
-              backgroundColor: Colors.green,
-            ),
-          );
+      // Debug: PlayStore URL check
+      print("Searching with URL: ${widget.app.playStoreUrl}");
 
-          // Dialog refresh (optional)
-          if (context.mounted) {
-            Navigator.of(context).pop(); // close dialog
-          }
-        }
+      final query = await FirebaseFirestore.instance
+          .collection('apps')
+          .where('playStoreUrl', isEqualTo: widget.app.playStoreUrl)
+          .limit(1)
+          .get();
+
+      print("Documents found: ${query.docs.length}");
+
+      if (query.docs.isNotEmpty) {
+        final docRef = query.docs.first.reference;
+
+        await docRef.update({
+          'name': updatedApp.name,
+          'shortDescription': updatedApp.shortDescription.isNotEmpty
+              ? updatedApp.shortDescription
+              : FieldValue.delete(),
+          'rating': updatedApp.rating > 0
+              ? updatedApp.rating
+              : widget.app.rating,
+          'downloads': updatedApp.downloads > 0
+              ? updatedApp.downloads
+              : widget.app.downloads,
+          'lastUpdated': FieldValue.serverTimestamp(),
+        });
+
+        print("✅ Successfully updated in Firebase");
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('✅ Successfully Updated!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+
+        if (context.mounted) Navigator.of(context).pop();
       } else {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('❌ Failed to update')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('❌ App not found in Firebase. Check playStoreUrl'),
+            backgroundColor: Colors.orange,
+          ),
+        );
       }
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Error updating app')));
+      print('❌ Update Error: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('❌ Update failed: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
 
