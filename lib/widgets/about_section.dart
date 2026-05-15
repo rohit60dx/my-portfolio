@@ -29,9 +29,7 @@ class AboutSection extends StatelessWidget {
             subtitle: 'Get to know me better',
           ),
           const SizedBox(height: 60),
-          isMobile
-              ? _buildMobile(context)
-              : _buildDesktop(context),
+          isMobile ? _buildMobile(context) : _buildDesktop(context),
         ],
       ),
     );
@@ -50,11 +48,7 @@ class AboutSection extends StatelessWidget {
 
   Widget _buildMobile(BuildContext context) {
     return Column(
-      children: [
-        _buildInfo(),
-        const SizedBox(height: 40),
-        _buildDetails(),
-      ],
+      children: [_buildInfo(), const SizedBox(height: 40), _buildDetails()],
     );
   }
 

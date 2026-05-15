@@ -52,10 +52,7 @@ class SectionHeader extends StatelessWidget {
         const SizedBox(height: 8),
         Text(
           subtitle,
-          style: GoogleFonts.inter(
-            color: AppTheme.textSecondary,
-            fontSize: 16,
-          ),
+          style: GoogleFonts.inter(color: AppTheme.textSecondary, fontSize: 16),
         ),
       ],
     );

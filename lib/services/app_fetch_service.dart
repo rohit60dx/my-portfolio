@@ -1,14 +1,13 @@
 // lib/services/app_fetch_service.dart
 import 'dart:convert';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:rohit_portfolio/models/app_model.dart';
 
 class AppFetchService {
-  // ✅ Apni deployed Cloud Function ka URL yahan daalo
   static const String _functionUrl =
-      'https://my-portfolio-57yr.onrender.com/fetch-app';
+      'https://rohit60dx.vercel.app/api/fetch-app';
 
-  /// Sirf Play Store URL, ya Apple URL, ya dono de sakte ho
   static Future<AppModel?> fetchFromStores({
     String? playStoreUrl,
     String? appStoreUrl,
@@ -25,30 +24,36 @@ class AppFetchService {
         }),
       );
 
-      if (response.statusCode != 200) return null;
+      debugPrint('Status Code: ${response.statusCode}'); // Debugging
+      debugPrint('Response: ${response.body}'); // Debugging
+
+      if (response.statusCode != 200) {
+        debugPrint('Error: ${response.body}');
+        return null;
+      }
 
       final data = jsonDecode(response.body) as Map<String, dynamic>;
 
       return AppModel(
-        id: '', // Firebase mein save karte waqt set hoga
+        id: '',
         name: data['name'] ?? '',
         shortDescription: data['shortDescription'] ?? '',
         description: data['description'] ?? '',
         iconUrl: data['iconUrl'] ?? '',
         screenshots: List<String>.from(data['screenshots'] ?? []),
-        rating: (data['rating'] as num?)?.toDouble() ?? 0.0,
+        rating: (data['googleRating'] as num?)?.toDouble() ?? 0.0,
         totalRatings: (data['totalRatings'] as num?)?.toInt() ?? 0,
         downloads: (data['downloads'] as num?)?.toInt() ?? 0,
-        version: data['version'] ?? '',
-        size: data['size'] ?? '',
-        category: data['category'] ?? '',
-        // developer: data['developer'] ?? '',
+        version: data['version'] ?? 'Latest',
+        size: data['size'] ?? 'Varies with device',
+        category: data['category'] ?? 'Mobile App',
         playStoreUrl: playStoreUrl,
         appStoreUrl: appStoreUrl,
         androidApkUrl: null,
-        features: [],
+        features: List<String>.from(data['features'] ?? []),
       );
     } catch (e) {
+      debugPrint('❌ Fetch Service Error: $e');
       return null;
     }
   }

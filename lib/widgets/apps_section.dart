@@ -1,9 +1,11 @@
 // lib/widgets/apps_section.dart
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:rohit_portfolio/services/app_fetch_service.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../models/app_model.dart';
 import '../utils/theme.dart';
@@ -545,6 +547,14 @@ class __AppDetailDialogState extends State<_AppDetailDialog> {
               ],
             ),
           ),
+
+          IconButton(
+            onPressed: () => _updateSingleApp(context),
+            icon: const Icon(Icons.refresh_rounded),
+            tooltip: 'Update App Data',
+            color: AppTheme.primary,
+          ),
+
           IconButton(
             onPressed: () => Navigator.of(context).pop(),
             padding: EdgeInsets.zero,
@@ -558,6 +568,61 @@ class __AppDetailDialogState extends State<_AppDetailDialog> {
         ],
       ),
     );
+  }
+
+  // Single App Update Function
+  Future<void> _updateSingleApp(BuildContext context) async {
+    try {
+      setState(() {}); // loading dikha sakte ho agar chaaho
+
+      final updatedApp = await AppFetchService.fetchFromStores(
+        playStoreUrl: widget.app.playStoreUrl,
+        appStoreUrl: widget.app.appStoreUrl,
+      );
+
+      if (updatedApp != null) {
+        // Firebase mein update kar do
+        final doc = await FirebaseFirestore.instance
+            .collection('apps')
+            .where('playStoreUrl', isEqualTo: widget.app.playStoreUrl)
+            .get();
+
+        if (doc.docs.isNotEmpty) {
+          await doc.docs.first.reference.update({
+            'name': updatedApp.name,
+            'shortDescription': updatedApp.shortDescription,
+            'description': updatedApp.description,
+            'iconUrl': updatedApp.iconUrl,
+            'screenshots': updatedApp.screenshots,
+            'rating': updatedApp.rating,
+            'totalRatings': updatedApp.totalRatings,
+            'downloads': updatedApp.downloads,
+            'version': updatedApp.version,
+            'lastUpdated': FieldValue.serverTimestamp(),
+          });
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('✅ App Updated Successfully!'),
+              backgroundColor: Colors.green,
+            ),
+          );
+
+          // Dialog refresh (optional)
+          if (context.mounted) {
+            Navigator.of(context).pop(); // close dialog
+          }
+        }
+      } else {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('❌ Failed to update')));
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Error updating app')));
+    }
   }
 
   Widget _sectionTitle(String title) => Text(

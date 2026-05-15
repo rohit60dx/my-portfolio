@@ -1,8 +1,11 @@
 // lib/services/firebase_service.dart
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:flutter/material.dart';
 import 'package:rohit_portfolio/models/app_model.dart';
 import 'package:rohit_portfolio/models/profile_model.dart';
 import 'package:rohit_portfolio/models/project_model.dart';
+import 'package:rohit_portfolio/services/app_fetch_service.dart';
 
 class FirebaseService {
   static final FirebaseFirestore _db = FirebaseFirestore.instance;
@@ -15,7 +18,7 @@ class FirebaseService {
         return ProfileModel.fromFirestore(doc.data()!);
       }
     } catch (e) {
-      print('Error fetching profile: $e');
+      debugPrint('Error fetching profile: $e');
     }
     return ProfileModel.defaultProfile();
   }
@@ -28,7 +31,7 @@ class FirebaseService {
           .map((doc) => ProjectModel.fromFirestore(doc.data(), doc.id))
           .toList();
     } catch (e) {
-      print('Error fetching projects: $e');
+      debugPrint('Error fetching projects: $e');
       return [];
     }
   }
@@ -45,7 +48,7 @@ class FirebaseService {
           .map((doc) => AppModel.fromFirestore(doc.data(), doc.id))
           .toList();
     } catch (e) {
-      print('Error fetching apps: $e');
+      debugPrint('Error fetching apps: $e');
       return [];
     }
   }
@@ -85,7 +88,7 @@ class FirebaseService {
       });
       return true;
     } catch (e) {
-      print('Error saving app: $e');
+      debugPrint('Error saving app: $e');
       return false;
     }
   }
@@ -106,8 +109,47 @@ class FirebaseService {
       });
       return true;
     } catch (e) {
-      print('Error submitting contact: $e');
+      debugPrint('Error submitting contact: $e');
       return false;
+    }
+  }
+
+  // Auto Update All Apps
+  static Future<void> updateAllApps() async {
+    try {
+      final snapshot = await _db.collection('apps').get();
+
+      for (var doc in snapshot.docs) {
+        final data = doc.data();
+        final playUrl = data['playStoreUrl'];
+        final appleUrl = data['appStoreUrl'];
+
+        if (playUrl != null || appleUrl != null) {
+          final updatedApp = await AppFetchService.fetchFromStores(
+            playStoreUrl: playUrl,
+            appStoreUrl: appleUrl,
+          );
+
+          if (updatedApp != null) {
+            await doc.reference.update({
+              'name': updatedApp.name,
+              'shortDescription': updatedApp.shortDescription,
+              'description': updatedApp.description,
+              'iconUrl': updatedApp.iconUrl,
+              'screenshots': updatedApp.screenshots,
+              'rating': updatedApp.rating,
+              'totalRatings': updatedApp.totalRatings,
+              'downloads': updatedApp.downloads,
+              'version': updatedApp.version,
+              'lastUpdated': FieldValue.serverTimestamp(),
+            });
+            debugPrint('✅ Updated: ${updatedApp.name}');
+          }
+        }
+      }
+    } catch (e) {
+      debugPrint('Auto Update Error: $e');
+      FirebaseCrashlytics.instance.recordError(e, null);
     }
   }
 }
