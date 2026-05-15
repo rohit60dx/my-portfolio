@@ -34,7 +34,6 @@ dependencies:
   js: ^0.7.1
   emailjs: ^4.0.0
   firebase_analytics: ^10.8.0 
-  firebase_crashlytics: 
   
 
 dev_dependencies:

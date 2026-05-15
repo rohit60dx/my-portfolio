@@ -548,13 +548,12 @@ class __AppDetailDialogState extends State<_AppDetailDialog> {
             ),
           ),
 
-          IconButton(
-            onPressed: () => _updateSingleApp(context),
-            icon: const Icon(Icons.refresh_rounded),
-            tooltip: 'Update App Data',
-            color: AppTheme.primary,
-          ),
-
+          // IconButton(
+          //   onPressed: () => _updateSingleApp(context),
+          //   icon: const Icon(Icons.refresh_rounded),
+          //   tooltip: 'Update App Data',
+          //   color: AppTheme.primary,
+          // ),
           IconButton(
             onPressed: () => Navigator.of(context).pop(),
             padding: EdgeInsets.zero,

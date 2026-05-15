@@ -1,6 +1,5 @@
 // lib/services/firebase_service.dart
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 import 'package:rohit_portfolio/models/app_model.dart';
 import 'package:rohit_portfolio/models/profile_model.dart';
@@ -149,7 +148,6 @@ class FirebaseService {
       }
     } catch (e) {
       debugPrint('Auto Update Error: $e');
-      FirebaseCrashlytics.instance.recordError(e, null);
     }
   }
 }
