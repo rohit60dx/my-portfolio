@@ -10,11 +10,6 @@ void main() async {
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-  // // Crashlytics Setup
-  // FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
-  // await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(true);
-
-  // Optional: Analytics
   final analytics = FirebaseAnalytics.instance;
   await analytics.logAppOpen();
 

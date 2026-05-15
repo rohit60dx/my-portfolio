@@ -32,9 +32,8 @@ dependencies:
   particles_flutter: 
   http: ^1.2.0
   js: ^0.7.1
-  # emailjs: ^4.0.0
   firebase_analytics: ^10.8.0 
-  resend: ^1.0.0
+
   
 
 dev_dependencies:

@@ -1,7 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:resend/resend.dart';
+import 'package:http/http.dart' as http;
 import '../models/profile_model.dart';
 import '../services/firebase_service.dart';
 import '../utils/theme.dart';
@@ -36,31 +38,32 @@ class _ContactSectionState extends State<ContactSection> {
     });
 
     try {
-      final resend = Resend(apiKey: 're_8iGS56NX_2jasgYqeZzXcHsFknpUJZn9d');
-
-      await resend.sendEmail(
-        from: 'Portfolio <onboarding@resend.dev>',
-        to: ['rohit50dx@gmail.com'],
-        subject: 'New Contact from ${_nameController.text.trim()}',
-        html:
-            '''
-        <h2>New Message Received</h2>
-        <p><strong>Name:</strong> ${_nameController.text.trim()}</p>
-        <p><strong>Email:</strong> ${_emailController.text.trim()}</p>
-        <p><strong>Message:</strong></p>
-        <p style="white-space: pre-wrap;">${_messageController.text.trim()}</p>
-        <hr>
-        <small>Sent from Portfolio App • ${DateTime.now().toString()}</small>
-      ''',
-      );
-
-      debugPrint('✅ Email sent successfully via Resend');
-
       await FirebaseService.submitContact(
         name: _nameController.text.trim(),
         email: _emailController.text.trim(),
         message: _messageController.text.trim(),
       );
+
+      final response = await http.post(
+        Uri.parse('https://api.web3forms.com/submit'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: json.encode({
+          'access_key': '5967f810-ccec-4242-8c62-ae79aba7bdb9',
+          'subject': 'Portfolio Contact: ${_nameController.text.trim()}',
+          'from_name': _nameController.text.trim(),
+          'email': _emailController.text.trim(),
+          'message': _messageController.text.trim(),
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        debugPrint('✅ Email sent successfully via Web3Forms');
+      } else {
+        debugPrint('❌ Web3Forms Error: ${response.body}');
+      }
 
       setState(() {
         _sending = false;
@@ -71,7 +74,7 @@ class _ContactSectionState extends State<ContactSection> {
       _emailController.clear();
       _messageController.clear();
     } catch (e) {
-      debugPrint('❌ Resend Error: $e');
+      debugPrint('❌ Error: $e');
       setState(() {
         _sending = false;
         _status = '❌ Failed to send. Try again.';

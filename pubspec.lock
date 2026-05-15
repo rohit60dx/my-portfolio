@@ -568,14 +568,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.6.0"
-  resend:
-    dependency: "direct main"
-    description:
-      name: resend
-      sha256: "2e0532f29a057e8a8f643adb8fc3d882e836d316da07cba821d83da72889c1ab"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.0"
   rxdart:
     dependency: transitive
     description:
